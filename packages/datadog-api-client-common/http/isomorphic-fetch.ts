@@ -18,6 +18,7 @@ export class IsomorphicFetchHttpLibrary implements HttpLibrary {
   public backoffBase!: number;
   public backoffMultiplier!: number;
   #fetch: any;
+  private errorMessages: any[] = [];
 
   constructor({ fetch: customFetch }: { fetch?: any }) {
     this.#fetch =
@@ -127,9 +128,15 @@ export class IsomorphicFetchHttpLibrary implements HttpLibrary {
         return this.executeRequest(request, body, currentAttempt, headers);
       }
       return response;
-    } catch (error) {
-      logger.error("An error occurred during the HTTP request:", error);
-      throw error;
+    } catch (error:any) {
+      this.errorMessages.push(error.message || error.toString());
+    }
+    this.logErros();
+  }
+
+  private logErros() {
+    if (this.errorMessages.length > 0) {
+     logger.error("An error occurred during the HTTP request:", this.errorMessages.join("\n"));
     }
   }
 
